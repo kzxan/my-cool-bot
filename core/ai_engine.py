@@ -5,9 +5,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class AICore:
-    def __init__(self):
-        self.client = AsyncOpenAI(api_key=os.getenv("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"))
-        self.model = os.getenv("AI_MODEL", "gpt-4-turbo")
+    def __init__(self):  # _init_ емес, қос астын сызу __init__ болуы керек
+        # Groq-тың ресми base_url-і қосылды
+        self.client = AsyncOpenAI(
+            api_key=os.getenv("GROQ_API_KEY"),
+            base_url="https://api.groq.com/openai/v1"
+        )
+        # Модельді Groq-тың тегін моделіне ауыстырамыз (llama-3.3-70b-versatile)
+        self.model = os.getenv("AI_MODEL", "llama-3.3-70b-versatile")
 
     async def get_response(self, text: str):
         try:

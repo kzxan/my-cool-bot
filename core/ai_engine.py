@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class AICore:
-    def _init_(self):
+    def __init__(self):
         self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = os.getenv("AI_MODEL", "gpt-4-turbo")
 

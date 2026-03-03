@@ -6,27 +6,20 @@ load_dotenv()
 
 class AICore:
     def __init__(self):
-        # Groq-ты қолданамыз
+        # Google AI Studio-дан алған API кілтті қолданамыз
+        # Gemini-дің OpenAI-мен үйлесімді base_url-і осындай:
         self.client = AsyncOpenAI(
-            api_key=os.getenv("GROQ_API_KEY"),
-            base_url="https://api.groq.com/openai/v1"
+            api_key=os.getenv("GEMINI_API_KEY"),
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
         )
-        self.model = os.getenv("AI_MODEL", "llama-3.3-70b-versatile")
+        # Модель атауын Gemini-ге ауыстырамыз (мысалы: gemini-1.5-flash немесе gemini-1.5-pro)
+        self.model = os.getenv("AI_MODEL", "gemini-1.5-flash")
 
     async def get_response(self, text: str):
-        # Баяманның "тұлғасы" мен мультимедиа нұсқаулығы
         system_instruction = """
-        Сенің есімің - Баяман. Сен Meta AI сияқты ақылды, достық ниеттегі қазақша виртуалды ассистентсің.
-        
-        Сенің басты міндеттерің:
-        1. Кез келген сұраққа жауап беру (Meta AI сияқты).
-        2. Сурет салу (Image Generation): Егер пайдаланушы сурет сұраса, оған суреттің толық сипаттамасын (prompt) құрастырып, оны қалай елестететініңді айт.
-        3. Музыка мен Видео: Олардың сценарийін, сөзін немесе құрылымын жасап бер.
-        4. Фишингті анықтау: Егер хабарламада алаяқтық белгілері болса, бірден "Баяман ескертеді: Бұл қауіпті!" деп дабыл қақ.
-        
-        Сөйлеу стилі:
-        - Әрдайым "Мен Баяманмын" немесе "Менің атым Баяман" деп таныстыра аласың.
-        - Сөзің сыпайы, ақылды әрі қысқа болсын.
+        Сенің есімің - Баяман. Сен қазақша сөйлейтін ақылды ассистентсің.
+        Міндеттерің: сұраққа жауап беру, суретті сипаттау, фишингтен ескерту.
+        Стилің: сыпайы, қысқа, "Мен Баяманмын" деп танысасың.
         """
         
         try:
@@ -40,6 +33,6 @@ class AICore:
             )
             return response.choices[0].message.content
         except Exception as e:
-            return f"❌ Баяман қатесі: {str(e)}"
+            return f"❌ Баяман (Gemini) қатесі: {str(e)}"
 
 ai_engine = AICore()

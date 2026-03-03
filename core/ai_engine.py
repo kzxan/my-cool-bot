@@ -8,8 +8,10 @@ class AICore:
     def __init__(self):
         self.client = AsyncOpenAI(
             api_key=os.getenv("GEMINI_API_KEY"),
+            # 'v1' орнына 'v1beta' қолдану маңызды
             base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
         )
+        # Кейбір жағдайда 'models/gemini-1.5-flash' деп толық жазу керек болуы мүмкін
         self.model = os.getenv("AI_MODEL", "gemini-1.5-flash")
 
     async def get_response(self, text: str):
@@ -31,10 +33,11 @@ class AICore:
                     {"role": "system", "content": system_instruction},
                     {"role": "user", "content": text}
                 ],
-                temperature=0.5 # Жауаптар нақты болуы үшін сәл төмендетілді
+                temperature=0.5
             )
             return response.choices[0].message.content
         except Exception as e:
+            # Егер қате қайталанса, модель атын "models/gemini-1.5-flash" деп көріңіз
             return f"❌ Мэлс жүйесінде қате: {str(e)}"
 
 ai_engine = AICore()

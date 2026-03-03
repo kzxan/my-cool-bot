@@ -15,7 +15,7 @@ class AICore:
 
         genai.configure(api_key=api_key)
 
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        self.model = "gemini-1.5-pro"
 
     async def get_response(self, text: str):
         system_instruction = """

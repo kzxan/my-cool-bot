@@ -1,51 +1,42 @@
 import os
-import asyncio
-import google.generativeai as genai
+from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
 class AICore:
     def __init__(self):
-        api_key = os.getenv("GOOGLE_API_KEY")
-
-        if not api_key:
-            raise ValueError("GOOGLE_API_KEY табылмады")
-
-        genai.configure(api_key=api_key)
-
-        self.model = "gemini-1.5-pro"
+        # Groq-ты қолданамыз - бұл қазіргі ең тұрақты нұсқа
+        self.client = AsyncOpenAI(
+            api_key=os.getenv("GROQ_API_KEY"),
+            base_url="https://api.groq.com/openai/v1"
+        )
+        # Ең мықты модельдердің бірі
+        self.model = "llama-3.3-70b-versatile"
 
     async def get_response(self, text: str):
+        # Мэлстің баптаулары
         system_instruction = """
-        Сенің есімің - Мэлс. Сен Мэлс есімді ақылды қазақша көмекшісің.
+        Сенің есімің - Мэлс. Сен өте ақылды қазақша көмекшісің.
         
-        1. Сәлемдесу: Пайдаланушы "Сәлем" немесе соған ұқсас амандасса ғана:
-           "Сәлем! Мен Мэлспін, сіздің көмекшіңізбін. Қалай көмектесе аламын?" деп жауап бер.
-        2. Нақты сұрақтар: Егер сұрақ нақты болса, өзіңді таныстырмай, бірден жауапқа көш.
-        3. Фишингті анықтау: Хабарламада "ұтыс", "бонус", "шот бұғатталды",
-           "карта мәліметі" немесе күмәнді сілтеме болса, бірден:
-           "🚨 МЭЛС ЕСКЕРТЕДІ: Бұл фишингтік шабуыл болуы мүмкін!" деп дабыл қақ.
-        4. Сурет салу: Пайдаланушы сурет сұраса, оның егжей-тегжейлі сипаттамасын (prompt) құрастырып бер.
+        Тәртібің:
+        1. Сәлемдесу: Пайдаланушы "сәлем" десе: "Сәлем! Мен Мэлспін, сіздің көмекшіңізбін. Қалай көмектесе аламын?" деп қана жауап бер.
+        2. Басқа сұрақтар: Бірден іске көш, өзіңді таныстырма.
+        3. Фишинг: Мәтінде алаяқтық (банк, ұтыс, күмәнді сілтеме) болса, бірден: "🚨 МЭЛС ЕСКЕРТЕДІ: Бұл фишингтік шабуыл болуы мүмкін!" деп жауап бер.
+        4. Сурет салу: Пайдаланушы сурет сұраса, оған кәсіби промпт (сипаттама) жазып бер.
         """
-
+        
         try:
-            full_prompt = f"{system_instruction}\n\nПайдаланушы: {text}"
-
-            # Gemini SDK sync жұмыс істейді → async ету үшін thread қолданамыз
-            response = await asyncio.to_thread(
-                self.model.generate_content,
-                full_prompt,
-                generation_config={
-                    "temperature": 0.7
-                }
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": text}
+                ],
+                temperature=0.6
             )
-
-            return response.text
-
+            return response.choices[0].message.content
         except Exception as e:
-            return f"❌ Мэлс жүйесінде қате: {str(e)}"
-
+            return f"❌ Мэлс (Groq) қатесі: {str(e)}"
 
 ai_engine = AICore()
